@@ -2,13 +2,13 @@ spring.datasource.url: jdbc:mysql://localhost:3306/blog?serverTimezone=UTC
 spring.datasource.username: root
 spring.datasource.password: mmm333
 spring.jpa.hibernate.ddl-auto: update
-spring.mail.host: smtp.mail.ru
+spring.mail.host: smtp.mailtrap.io
 spring.mail.port: 25
-spring.mail.username: devpub@mail.ru
-spring.mail.password: application1234567
+spring.mail.username: 8949ff750e2c74
+spring.mail.password: 0edd577ceaa3d5
 spring.mail.properties.mail.smtp.auth: true
 spring.mail.properties.mail.smtp.starttls.enable: true
-downloadImagePath: upload/
+uploadPath: upload/
 domain: http://localhost:8080
 #time in minutes
 captchaLifeTime: 60
