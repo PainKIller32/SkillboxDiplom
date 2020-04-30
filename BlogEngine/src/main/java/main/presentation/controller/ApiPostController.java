@@ -30,10 +30,10 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post")
-    public ResponseEntity getPosts(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("mode") String mode) {
+    public ResponseEntity<PostsDto> getPosts(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("mode") String mode) {
         Iterable<Post> posts = postUseCase.getPosts(offset, limit, mode);
         if (posts == null) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         List<PostShortViewDto> postDtoList = new ArrayList<>();
@@ -50,7 +50,7 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/{id}")
-    public ResponseEntity getPostById(@PathVariable int id) {
+    public ResponseEntity<PostFullViewDto> getPostById(@PathVariable int id) {
         return postUseCase.getPostById(id).map(value ->
                 new ResponseEntity<>(new PostFullViewDto(value), HttpStatus.OK)).orElseGet(() ->
                 new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -67,9 +67,9 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/moderation")
-    public ResponseEntity getPostByModeration(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("status") String status) {
+    public ResponseEntity<PostsDto> getPostByModeration(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("status") String status) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         List<Post> posts = postUseCase.getPostByModeration(userSecurity.getAuthorizedUserId(httpSession.getId()), offset, limit, status);
@@ -81,17 +81,17 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/my")
-    public ResponseEntity getMyPosts(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("status") String status) {
+    public ResponseEntity<PostsDto> getMyPosts(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("status") String status) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return getResponseEntityWithPosts(postUseCase.getMyPost(userSecurity.getAuthorizedUserId(httpSession.getId()), offset, limit, status), offset, limit);
     }
 
     @PostMapping("/api/post")
-    public ResponseEntity addPost(@RequestBody NewPostDto newPost) {
+    public ResponseEntity<ResultDto> addPost(@RequestBody NewPostDto newPost) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         HashMap<String, String> errors = postUseCase.checkPostErrors(newPost.getText(), newPost.getTitle());
         if (!errors.isEmpty()) {
@@ -102,33 +102,33 @@ public class ApiPostController {
     }
 
     @PutMapping("/api/post/{id}")
-    public ResponseEntity editPost(@PathVariable int id, @RequestBody NewPostDto newPost) {
+    public ResponseEntity<ResultDto> editPost(@PathVariable int id, @RequestBody NewPostDto newPost) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         HashMap<String, String> errors = postUseCase.checkPostErrors(newPost.getText(), newPost.getTitle());
         if (!errors.isEmpty()) {
             return new ResponseEntity<>(new ResultWithErrorsDto(false, errors), HttpStatus.OK);
         } else {
             return postUseCase.editPost(userSecurity.getAuthorizedUserId(httpSession.getId()), id, newPost) ?
-                    new ResponseEntity<>(ResultDto.success(), HttpStatus.OK) : new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+                    new ResponseEntity<>(ResultDto.success(), HttpStatus.OK) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/api/post/like")
-    public ResponseEntity likePost(@RequestBody PostVoteDto postVote) {
+    public ResponseEntity<ResultDto> likePost(@RequestBody PostVoteDto postVote) {
         return votePost(postVote.getPostId(), 1);
     }
 
     @PostMapping("/api/post/dislike")
-    public ResponseEntity dislikePost(@RequestBody PostVoteDto postVote) {
+    public ResponseEntity<ResultDto> dislikePost(@RequestBody PostVoteDto postVote) {
         return votePost(postVote.getPostId(), -1);
     }
 
 
-    private ResponseEntity votePost(int postId, int value) {
+    private ResponseEntity<ResultDto> votePost(int postId, int value) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return postUseCase.votePost(userSecurity.getAuthorizedUserId(httpSession.getId()), postId, value) ?
                 new ResponseEntity<>(ResultDto.success(), HttpStatus.OK) : new ResponseEntity<>(ResultDto.decline(), HttpStatus.OK);

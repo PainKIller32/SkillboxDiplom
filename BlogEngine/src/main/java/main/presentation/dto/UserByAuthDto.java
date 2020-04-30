@@ -3,10 +3,10 @@ package main.presentation.dto;
 import main.domain.model.User;
 
 public class UserByAuthDto extends UserByCommentDto {
-    public String email;
-    public boolean moderation;
-    public int moderationCount;
-    public boolean settings;
+    public final String email;
+    public final boolean moderation;
+    public final int moderationCount;
+    public final boolean settings;
 
     public UserByAuthDto(User user, int moderationCount) {
         super(user);

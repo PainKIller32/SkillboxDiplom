@@ -15,7 +15,7 @@ public interface PostVoteRepository extends CrudRepository<PostVote, Integer> {
     @Query("SELECT pv.postId AS postId, count(pv.value) AS likeCount " +
             "FROM PostVote AS pv " +
             "INNER JOIN Post AS p ON pv.postId = p.id " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' " +
+            "WHERE p.active = true AND p.moderationStatus = 'ACCEPTED' " +
             "AND pv.value > 0 " +
             "group by pv.postId order by likeCount DESC")
     List<LikeCount> getBestPostsId(Pageable page);

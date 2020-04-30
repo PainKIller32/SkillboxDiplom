@@ -9,18 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class PostDto {
-    public int id;
-    public String time;
-    public UserDto user;
-    public String title;
-    public String text;
-    public String announce;
-    public int likeCount;
-    public int dislikeCount;
-    public int commentCount;
-    public int viewCount;
-    public List<CommentDto> comments;
-    public List<String> tags;
+    public final int id;
+    public final String time;
+    public final UserDto user;
+    public final String title;
+    public final String text;
+    public final String announce;
+    public final int likeCount;
+    public final int dislikeCount;
+    public final int commentCount;
+    public final int viewCount;
+    public final List<CommentDto> comments;
+    public final List<String> tags;
 
     public PostDto(Post post) {
         this.id = post.getId();
@@ -37,7 +37,6 @@ public abstract class PostDto {
         for (PostComment postComment : post.getComments()) {
             comments.add(new CommentDto(postComment));
         }
-        tags = new ArrayList<>();
         this.tags = post.getTags();
     }
 }

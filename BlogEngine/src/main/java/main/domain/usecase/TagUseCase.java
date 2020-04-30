@@ -4,11 +4,13 @@ import main.domain.model.Tag;
 import main.domain.port.PostRepositoryPort;
 import main.domain.port.TagRepositoryPort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.TreeSet;
 
 @Component
+@Transactional(readOnly = true)
 public class TagUseCase {
     private final PostRepositoryPort postRepositoryPort;
     private final TagRepositoryPort tagRepositoryPort;

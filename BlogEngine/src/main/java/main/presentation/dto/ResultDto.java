@@ -1,7 +1,11 @@
 package main.presentation.dto;
 
 public class ResultDto {
-    public boolean result;
+    public final boolean result;
+
+    public ResultDto() {
+        result = true;
+    }
 
     public ResultDto(boolean result) {
         this.result = result;

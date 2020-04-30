@@ -14,7 +14,7 @@ public interface PostCommentRepository extends CrudRepository<PostComment, Integ
     @Query("SELECT pc.postId AS postId, count(pc.id) AS c " +
             "FROM PostComment AS pc " +
             "INNER JOIN Post AS p ON pc.postId = p.id " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' " +
+            "WHERE p.active = true AND p.moderationStatus = 'ACCEPTED' " +
             "GROUP BY pc.postId ORDER BY c DESC")
     List<CommentCount> getPopularPostId(Pageable page);
 }

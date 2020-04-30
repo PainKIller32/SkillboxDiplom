@@ -11,9 +11,9 @@ public class CaptchaCode {
     private int id;
     @Column(columnDefinition = "DATETIME NOT NULL")
     private LocalDateTime time;
-    @Column(columnDefinition = "TINYTEXT NOT NULL")
+    @Column(columnDefinition = "VARCHAR(255) NOT NULL")
     private String code;
-    @Column(name = "secret_code", columnDefinition = "TINYTEXT NOT NULL")
+    @Column(name = "secret_code", columnDefinition = "VARCHAR(255) NOT NULL")
     private String secretCode;
 
     public int getId() {

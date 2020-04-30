@@ -3,28 +3,28 @@ package main.domain.service;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 
 @Service
+@Transactional
 public class FileService {
     public boolean deleteFile(File file) {
-        boolean result;
-        if (file.isDirectory()) {
-            String[] files = file.list();
-            if (files == null || files.length == 0) {
-                result = file.delete();
-            } else {
-                for (String fileName : files) {
-                    deleteFile(new File(file.getPath() + File.separator + fileName));
-                }
-                result = file.delete();
-            }
-        } else {
-            result = file.delete();
+        try {
+            Files.walk(file.toPath())
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
-        return result;
     }
 
     @Value("${uploadPath}")

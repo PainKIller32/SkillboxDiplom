@@ -3,8 +3,8 @@ package main.presentation.dto;
 import java.util.List;
 
 public class PostsDto<T> {
-    public int count;
-    public List<T> posts;
+    public final int count;
+    public final List<T> posts;
 
     public PostsDto(int count, List<T> posts) {
         this.count = count;

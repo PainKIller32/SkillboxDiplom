@@ -11,8 +11,8 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    @Column(name = "is_active", columnDefinition = "TINYINT NOT NULL")
-    private int isActive;
+    @Column(name = "is_active", columnDefinition = "TINYINT(1) NOT NULL")
+    private boolean active;
     @Column(name = "moderation_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private ModerationStatus moderationStatus;
@@ -32,7 +32,7 @@ public class Post {
     private List<PostVote> votes;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "postId", cascade = CascadeType.ALL)
     private List<PostComment> comments;
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     private User user;
     @ManyToMany(cascade = CascadeType.ALL)
@@ -47,12 +47,12 @@ public class Post {
         this.id = id;
     }
 
-    public int getActive() {
-        return isActive;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setActive(int active) {
-        isActive = active;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public ModerationStatus getModerationStatus() {

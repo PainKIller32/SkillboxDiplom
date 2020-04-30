@@ -1,11 +1,13 @@
 package main.domain.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
+@Transactional
 public class UserSecurity {
     private ConcurrentMap<String, Integer> authorizedUsers = new ConcurrentHashMap<>();
 

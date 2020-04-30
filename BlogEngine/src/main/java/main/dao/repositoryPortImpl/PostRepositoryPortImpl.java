@@ -22,43 +22,43 @@ public class PostRepositoryPortImpl implements PostRepositoryPort {
     }
 
     @Override
-    public List<Post> findPostsByIsActiveAndModerationStatusAndTimeLessThanEqual(int active, ModerationStatus moderationStatus, LocalDateTime date, Pageable page) {
-        return postRepository.findPostsByIsActiveAndModerationStatusAndTimeLessThanEqual(active, moderationStatus, date, page);
+    public List<Post> findPostsByActiveAndModerationStatusAndTimeLessThanEqual(boolean active, ModerationStatus moderationStatus, LocalDateTime date, Pageable page) {
+        return postRepository.findPostsByActiveAndModerationStatusAndTimeLessThanEqual(active, moderationStatus, date, page);
     }
 
     @Override
-    public List<Post> findPostsByIsActiveAndModerationStatusAndTimeLessThanEqualAndTextContains(int active, ModerationStatus moderationStatus, LocalDateTime date, String query) {
-        return postRepository.findPostsByIsActiveAndModerationStatusAndTimeLessThanEqualAndTextContains(active, moderationStatus, date, query);
+    public List<Post> findPostsByActiveAndModerationStatusAndTimeLessThanEqualAndTextContains(boolean active, ModerationStatus moderationStatus, LocalDateTime date, String query) {
+        return postRepository.findPostsByActiveAndModerationStatusAndTimeLessThanEqualAndTextContains(active, moderationStatus, date, query);
     }
 
     @Override
-    public Optional<Post> findPostByIdAndIsActiveAndModerationStatusAndTimeLessThanEqual(int id, int active, ModerationStatus moderationStatus, LocalDateTime date) {
-        return postRepository.findPostByIdAndIsActiveAndModerationStatusAndTimeLessThanEqual(id, active, moderationStatus, date);
+    public Optional<Post> findPostByIdAndActiveAndModerationStatusAndTimeLessThanEqual(int id, boolean active, ModerationStatus moderationStatus, LocalDateTime date) {
+        return postRepository.findPostByIdAndActiveAndModerationStatusAndTimeLessThanEqual(id, active, moderationStatus, date);
     }
 
     @Override
-    public List<Post> findPostsByIsActiveAndModerationStatusAndTimeBetween(int active, ModerationStatus moderationStatus, LocalDateTime startDay, LocalDateTime endDay) {
-        return postRepository.findPostsByIsActiveAndModerationStatusAndTimeBetween(active, moderationStatus, startDay, endDay);
+    public List<Post> findPostsByActiveAndModerationStatusAndTimeBetween(boolean active, ModerationStatus moderationStatus, LocalDateTime startDay, LocalDateTime endDay) {
+        return postRepository.findPostsByActiveAndModerationStatusAndTimeBetween(active, moderationStatus, startDay, endDay);
     }
 
     @Override
-    public List<Post> findPostsByIsActiveAndModeratorIdAndModerationStatus(int active, int moderatorId, ModerationStatus moderationStatus, Pageable page) {
-        return postRepository.findPostsByIsActiveAndModeratorIdAndModerationStatus(active, moderatorId, moderationStatus, page);
+    public List<Post> findPostsByActiveAndModeratorIdAndModerationStatus(boolean active, int moderatorId, ModerationStatus moderationStatus, Pageable page) {
+        return postRepository.findPostsByActiveAndModeratorIdAndModerationStatus(active, moderatorId, moderationStatus, page);
     }
 
     @Override
-    public List<Post> findPostsByIsActiveAndModerationStatus(int active, ModerationStatus moderationStatus, Pageable page) {
-        return postRepository.findPostsByIsActiveAndModerationStatus(active, moderationStatus, page);
+    public List<Post> findPostsByActiveAndModerationStatus(boolean active, ModerationStatus moderationStatus, Pageable page) {
+        return postRepository.findPostsByActiveAndModerationStatus(active, moderationStatus, page);
     }
 
     @Override
-    public List<Post> findPostsByIdAndIsActive(int id, int active, Pageable page) {
-        return postRepository.findPostsByIdAndIsActive(id, active, page);
+    public List<Post> findPostsByIdAndActive(int id, boolean active, Pageable page) {
+        return postRepository.findPostsByIdAndActive(id, active, page);
     }
 
     @Override
-    public List<Post> findPostsByUserIdAndIsActiveAndModerationStatus(int userId, int active, ModerationStatus moderationStatus, Pageable page) {
-        return postRepository.findPostsByUserIdAndIsActiveAndModerationStatus(userId, active, moderationStatus, page);
+    public List<Post> findPostsByUserIdAndActiveAndModerationStatus(int userId, boolean active, ModerationStatus moderationStatus, Pageable page) {
+        return postRepository.findPostsByUserIdAndActiveAndModerationStatus(userId, active, moderationStatus, page);
     }
 
     @Override
@@ -72,8 +72,8 @@ public class PostRepositoryPortImpl implements PostRepositoryPort {
     }
 
     @Override
-    public int getModerationPostCount(int id) {
-        return postRepository.getModerationPostCount(id);
+    public int countByModeratorId(int id) {
+        return postRepository.countByModeratorId(id);
     }
 
     @Override

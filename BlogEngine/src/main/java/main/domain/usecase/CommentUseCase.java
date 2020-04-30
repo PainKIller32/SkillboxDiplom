@@ -6,10 +6,12 @@ import main.domain.port.PostCommentRepPort;
 import main.domain.port.PostRepositoryPort;
 import main.domain.service.UserSecurity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 @Component
+@Transactional(readOnly = true)
 public class CommentUseCase {
     private final PostCommentRepPort postCommentRepPort;
     private final UserSecurity userSecurity;

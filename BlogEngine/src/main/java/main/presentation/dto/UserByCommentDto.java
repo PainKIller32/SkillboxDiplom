@@ -3,7 +3,7 @@ package main.presentation.dto;
 import main.domain.model.User;
 
 public class UserByCommentDto extends UserDto {
-    public String photo;
+    public final String photo;
 
     public UserByCommentDto(User user) {
         super(user);

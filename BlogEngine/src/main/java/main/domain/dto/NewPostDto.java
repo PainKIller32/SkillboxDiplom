@@ -2,7 +2,7 @@ package main.domain.dto;
 
 public class NewPostDto {
     private String time;
-    private int active;
+    private boolean active;
     private String title;
     private String text;
     private String[] tags;
@@ -15,11 +15,11 @@ public class NewPostDto {
         this.time = time;
     }
 
-    public int getActive() {
+    public boolean getActive() {
         return active;
     }
 
-    public void setActive(int active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 

@@ -33,17 +33,15 @@ public class ApiAuthController {
     }
 
     @PostMapping("/api/auth/login")
-    public ResponseEntity login(@RequestBody UserLoginDto userLogin) {
+    public ResponseEntity<ResultDto> login(@RequestBody UserLoginDto userLogin) {
         Optional<User> findUser = userUseCase.login(userLogin.getEmail(), userLogin.getPassword(), httpSession.getId());
-        if (findUser.isPresent()) {
-            return new ResponseEntity<>(new ResultWithUserDto(true, new UserByAuthDto(findUser.get(), userUseCase.getModerationCount(findUser.get()))), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(ResultDto.decline(), HttpStatus.OK);
-        }
+        return findUser.<ResponseEntity<ResultDto>>map(
+                user -> new ResponseEntity<>(new ResultWithUserDto(true, new UserByAuthDto(user, userUseCase.getModerationCount(user))), HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(ResultDto.decline(), HttpStatus.OK));
     }
 
     @GetMapping("/api/auth/check")
-    public ResponseEntity checkUser() {
+    public ResponseEntity<ResultDto> checkUser() {
         User user = userUseCase.check(httpSession.getId());
         if (user != null) {
             return new ResponseEntity<>(new ResultWithUserDto(true, new UserByAuthDto(user, userUseCase.getModerationCount(user))), HttpStatus.OK);
@@ -57,7 +55,7 @@ public class ApiAuthController {
     }
 
     @PostMapping("/api/auth/password")
-    public ResponseEntity changePassword(@RequestBody ChangePasswordDto changePassword) {
+    public ResponseEntity<ResultDto> changePassword(@RequestBody ChangePasswordDto changePassword) {
         HashMap<String, String> errors = userUseCase.changePassword(changePassword);
         if (errors.isEmpty()) {
             return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);
@@ -67,7 +65,7 @@ public class ApiAuthController {
     }
 
     @PostMapping("/api/auth/register")
-    public ResponseEntity registerUser(@RequestBody UserRegisterDto register) {
+    public ResponseEntity<ResultDto> registerUser(@RequestBody UserRegisterDto register) {
         HashMap<String, String> errors = userUseCase.register(register);
         if (errors.isEmpty()) {
             return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);

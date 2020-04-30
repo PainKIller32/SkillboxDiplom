@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.Optional;
 
 @Component
+@Transactional
 public class UserUseCase {
     private final UserRepositoryPort userRepositoryPort;
     private final UserSecurity userSecurity;
@@ -66,7 +68,7 @@ public class UserUseCase {
     }
 
     public int getModerationCount(User user) {
-        return postRepositoryPort.getModerationPostCount(user.getId());
+        return postRepositoryPort.countByModeratorId(user.getId());
     }
 
     @Value("${domain}")
@@ -179,7 +181,7 @@ public class UserUseCase {
                         errors.put("photo", "Фото слишком большое, нужно не более 5 Мб");
                         return errors;
                     } else {
-                        if (user.getPhoto() != null) {
+                        if (user.getPhoto() != null && !user.getPhoto().isEmpty()) {
                             fileService.deleteFile(new File(user.getPhoto().substring(1, 10)));
                         }
                         String uploadPhoto = fileService.uploadImage(photo);

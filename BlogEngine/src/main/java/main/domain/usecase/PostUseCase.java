@@ -9,6 +9,7 @@ import main.domain.port.UserRepositoryPort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
+@Transactional(readOnly = true)
 public class PostUseCase {
     private final PostRepositoryPort postRepositoryPort;
     private final PostVoteRepositoryPort postVoteRepositoryPort;
@@ -37,8 +39,8 @@ public class PostUseCase {
         List<Integer> postsId = new ArrayList<>();
         switch (mode) {
             case "recent":
-                posts = postRepositoryPort.findPostsByIsActiveAndModerationStatusAndTimeLessThanEqual(
-                        1,
+                posts = postRepositoryPort.findPostsByActiveAndModerationStatusAndTimeLessThanEqual(
+                        true,
                         ModerationStatus.ACCEPTED,
                         LocalDateTime.now(),
                         PageRequest.of(offset / limit, limit, Sort.by("time").descending()));
@@ -58,8 +60,8 @@ public class PostUseCase {
                 posts = postRepositoryPort.findAllById(postsId);
                 break;
             case "early":
-                posts = postRepositoryPort.findPostsByIsActiveAndModerationStatusAndTimeLessThanEqual(
-                        1,
+                posts = postRepositoryPort.findPostsByActiveAndModerationStatusAndTimeLessThanEqual(
+                        true,
                         ModerationStatus.ACCEPTED,
                         LocalDateTime.now(),
                         PageRequest.of(offset / limit, limit, Sort.by("time")));
@@ -75,15 +77,15 @@ public class PostUseCase {
     public List<Post> searchPost(String query) {
         List<Post> posts;
         if (query.isEmpty()) {
-            posts = postRepositoryPort.findPostsByIsActiveAndModerationStatusAndTimeLessThanEqual(
-                    1,
+            posts = postRepositoryPort.findPostsByActiveAndModerationStatusAndTimeLessThanEqual(
+                    true,
                     ModerationStatus.ACCEPTED,
                     LocalDateTime.now(),
                     null
             );
         } else {
-            posts = postRepositoryPort.findPostsByIsActiveAndModerationStatusAndTimeLessThanEqualAndTextContains(
-                    1,
+            posts = postRepositoryPort.findPostsByActiveAndModerationStatusAndTimeLessThanEqualAndTextContains(
+                    true,
                     ModerationStatus.ACCEPTED,
                     LocalDateTime.now(),
                     query
@@ -93,9 +95,9 @@ public class PostUseCase {
     }
 
     public Optional<Post> getPostById(int id) {
-        return postRepositoryPort.findPostByIdAndIsActiveAndModerationStatusAndTimeLessThanEqual(
+        return postRepositoryPort.findPostByIdAndActiveAndModerationStatusAndTimeLessThanEqual(
                 id,
-                1,
+                true,
                 ModerationStatus.ACCEPTED,
                 LocalDateTime.now()
         );
@@ -103,8 +105,8 @@ public class PostUseCase {
 
     public List<Post> getPostsByDate(String date) {
         LocalDateTime localDateTime = LocalDate.parse(date).atStartOfDay();
-        return postRepositoryPort.findPostsByIsActiveAndModerationStatusAndTimeBetween(
-                1,
+        return postRepositoryPort.findPostsByActiveAndModerationStatusAndTimeBetween(
+                true,
                 ModerationStatus.ACCEPTED,
                 localDateTime,
                 localDateTime.plusDays(1).minusSeconds(1)
@@ -122,14 +124,14 @@ public class PostUseCase {
             User user = findUser.get();
             if (user.isModerator()) {
                 if (status.equals("new")) {
-                    posts = postRepositoryPort.findPostsByIsActiveAndModerationStatus(
-                            1,
+                    posts = postRepositoryPort.findPostsByActiveAndModerationStatus(
+                            true,
                             ModerationStatus.NEW,
                             PageRequest.of(offset / limit, limit)
                     );
                 } else {
-                    posts = postRepositoryPort.findPostsByIsActiveAndModeratorIdAndModerationStatus(
-                            1,
+                    posts = postRepositoryPort.findPostsByActiveAndModeratorIdAndModerationStatus(
+                            true,
                             user.getId(),
                             ModerationStatus.valueOf(status.toUpperCase()),
                             PageRequest.of(offset / limit, limit)
@@ -144,26 +146,26 @@ public class PostUseCase {
         List<Post> posts = new ArrayList<>();
         switch (status) {
             case "inactive":
-                posts = postRepositoryPort.findPostsByIdAndIsActive(userId, 0, PageRequest.of(offset / limit, limit));
+                posts = postRepositoryPort.findPostsByIdAndActive(userId, false, PageRequest.of(offset / limit, limit));
                 break;
             case "pending":
-                posts = postRepositoryPort.findPostsByUserIdAndIsActiveAndModerationStatus(
+                posts = postRepositoryPort.findPostsByUserIdAndActiveAndModerationStatus(
                         userId,
-                        1,
+                        true,
                         ModerationStatus.NEW,
                         PageRequest.of(offset / limit, limit));
                 break;
             case "declined":
-                posts = postRepositoryPort.findPostsByUserIdAndIsActiveAndModerationStatus(
+                posts = postRepositoryPort.findPostsByUserIdAndActiveAndModerationStatus(
                         userId,
-                        1,
+                        true,
                         ModerationStatus.DECLINED,
                         PageRequest.of(offset / limit, limit));
                 break;
             case "published":
-                posts = postRepositoryPort.findPostsByUserIdAndIsActiveAndModerationStatus(
+                posts = postRepositoryPort.findPostsByUserIdAndActiveAndModerationStatus(
                         userId,
-                        1,
+                        true,
                         ModerationStatus.ACCEPTED,
                         PageRequest.of(offset / limit, limit));
                 break;
@@ -234,8 +236,8 @@ public class PostUseCase {
         return true;
     }
 
-    public HashMap<String, String> setModerationStatus(int postId, int moderatorId, String decision) {
-        HashMap<String, String> message = new HashMap<>();
+    public boolean setModerationStatus(int postId, int moderatorId, String decision) {
+       // HashMap<String, String> message = new HashMap<>();
         Optional<Post> findPost = postRepositoryPort.findById(postId);
         if (findPost.isPresent()) {
             Post post = findPost.get();
@@ -252,10 +254,11 @@ public class PostUseCase {
             }
             post.setModeratorId(moderatorId);
             postRepositoryPort.save(post);
+            return true;
         } else {
-            message.put("message", "Пост не существует");
+            return false;
+            //message.put("message", "Пост не существует");
         }
-        return message;
     }
 
     public List<PostByYearCount> getPostsByYearCount(String year) {

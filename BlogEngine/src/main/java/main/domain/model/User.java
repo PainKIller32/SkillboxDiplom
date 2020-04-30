@@ -22,7 +22,7 @@ public class User {
     private String password;
     @Column(columnDefinition = "VARCHAR(255)")
     private String code;
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "VARCHAR(255)")
     private String photo;
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Post> posts;

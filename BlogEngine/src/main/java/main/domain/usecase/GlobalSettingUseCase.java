@@ -6,11 +6,13 @@ import main.domain.model.User;
 import main.domain.port.GlobalSettingRepPort;
 import main.domain.port.UserRepositoryPort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.Optional;
 
 @Component
+@Transactional(readOnly = true)
 public class GlobalSettingUseCase {
     private final GlobalSettingRepPort settingRepositoryPort;
     private final UserRepositoryPort userRepositoryPort;

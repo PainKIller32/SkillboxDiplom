@@ -15,37 +15,36 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends CrudRepository<Post, Integer> {
-    List<Post> findPostsByIsActiveAndModerationStatusAndTimeLessThanEqual(int active, ModerationStatus moderationStatus, LocalDateTime date, Pageable page);
+    List<Post> findPostsByActiveAndModerationStatusAndTimeLessThanEqual(boolean active, ModerationStatus moderationStatus, LocalDateTime date, Pageable page);
 
-    List<Post> findPostsByIsActiveAndModerationStatusAndTimeLessThanEqualAndTextContains(int active, ModerationStatus moderationStatus, LocalDateTime date, String query);
+    List<Post> findPostsByActiveAndModerationStatusAndTimeLessThanEqualAndTextContains(boolean active, ModerationStatus moderationStatus, LocalDateTime date, String query);
 
-    Optional<Post> findPostByIdAndIsActiveAndModerationStatusAndTimeLessThanEqual(int id, int active, ModerationStatus moderationStatus, LocalDateTime date);
+    Optional<Post> findPostByIdAndActiveAndModerationStatusAndTimeLessThanEqual(int id, boolean active, ModerationStatus moderationStatus, LocalDateTime date);
 
-    List<Post> findPostsByIsActiveAndModerationStatusAndTimeBetween(int active, ModerationStatus moderationStatus, LocalDateTime startDay, LocalDateTime endDay);
+    List<Post> findPostsByActiveAndModerationStatusAndTimeBetween(boolean active, ModerationStatus moderationStatus, LocalDateTime startDay, LocalDateTime endDay);
 
-    List<Post> findPostsByIsActiveAndModeratorIdAndModerationStatus(int active, int moderatorId, ModerationStatus moderationStatus, Pageable page);
+    List<Post> findPostsByActiveAndModeratorIdAndModerationStatus(boolean active, int moderatorId, ModerationStatus moderationStatus, Pageable page);
 
-    List<Post> findPostsByIsActiveAndModerationStatus(int active, ModerationStatus moderationStatus, Pageable page);
+    List<Post> findPostsByActiveAndModerationStatus(boolean active, ModerationStatus moderationStatus, Pageable page);
 
-    List<Post> findPostsByIdAndIsActive(int id, int active, Pageable page);
+    List<Post> findPostsByIdAndActive(int id, boolean active, Pageable page);
 
-    List<Post> findPostsByUserIdAndIsActiveAndModerationStatus(int userId, int active, ModerationStatus moderationStatus, Pageable page);
+    List<Post> findPostsByUserIdAndActiveAndModerationStatus(int userId, boolean active, ModerationStatus moderationStatus, Pageable page);
 
     List<Post> findAllByUserId(int userId);
 
     @Query(value = "SELECT p FROM Post as p " +
             "INNER JOIN TagToPost AS t2p ON p.id = t2p.postId " +
             "INNER JOIN Tag as t ON t2p.tagId = t.id " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND t.name = :tag")
+            "WHERE p.active = true AND p.moderationStatus = 'ACCEPTED' AND t.name = :tag")
     List<Post> getPostByTag(String tag);
 
-    @Query("SELECT COUNT (ALL p.id) FROM Post AS p WHERE p.moderatorId = :id")
-    int getModerationPostCount(int id);
+    int countByModeratorId(int id);
 
     @Query("SELECT COUNT(ALL p.id ) FROM Post AS p")
     int getPostCount();
 
-    @Query("SELECT COUNT(ALL p.id ) FROM Post AS p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time < current_date ")
+    @Query("SELECT COUNT(ALL p.id ) FROM Post AS p WHERE p.active = true AND p.moderationStatus = 'ACCEPTED' AND p.time < current_date ")
     int getViewPostCount();
 
     @Query("SELECT SUM(p.viewCount) FROM Post AS p")

@@ -6,6 +6,7 @@ import main.domain.port.CaptchaRepositoryPort;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,6 +18,7 @@ import java.util.Base64;
 import java.util.Random;
 
 @Component
+@Transactional(readOnly = true)
 public class CaptchaUseCase {
     private final CaptchaRepositoryPort captchaRepositoryPort;
 

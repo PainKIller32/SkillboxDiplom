@@ -8,6 +8,7 @@ import main.domain.service.FileService;
 import main.domain.service.UserSecurity;
 import main.domain.usecase.*;
 import main.presentation.dto.*;
+import main.presentation.exception.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @RestController
 public class ApiGeneralController {
@@ -54,11 +53,11 @@ public class ApiGeneralController {
     }
 
     @PostMapping(value = "/api/profile/my", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity editProfileWithPhoto(@RequestParam String name,
-                                               @RequestParam String email,
-                                               @RequestParam(required = false) String password,
-                                               @RequestParam Integer removePhoto,
-                                               @RequestParam MultipartFile photo) {
+    public ResponseEntity<ResultDto> editProfileWithPhoto(@RequestParam String name,
+                                                          @RequestParam String email,
+                                                          @RequestParam(required = false) String password,
+                                                          @RequestParam Integer removePhoto,
+                                                          @RequestParam MultipartFile photo) {
         EditProfileDto profile = new EditProfileDto();
         profile.setName(name);
         profile.setEmail(email);
@@ -69,13 +68,13 @@ public class ApiGeneralController {
     }
 
     @PostMapping(value = "/api/profile/my", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity editProfile(@RequestBody EditProfileDto profile) {
+    public ResponseEntity<ResultDto> editProfile(@RequestBody EditProfileDto profile) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         HashMap<String, String> errors = userUseCase.editProfile(profile, httpSession.getId());
         if (errors == null) {
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (errors.isEmpty()) {
             return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);
@@ -90,14 +89,12 @@ public class ApiGeneralController {
     }
 
     @PostMapping("/api/comment")
-    public ResponseEntity addComment(@RequestBody NewCommentDto comment) {
+    public ResponseEntity<ResultDto> addComment(@RequestBody NewCommentDto comment) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         if (commentUseCase.checkExistence(comment)) {
-            HashMap<String, String> message = new HashMap<>();
-            message.put("message", "Комментарий или пост не существует");
-            return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Комментарий или пост не существует");
         }
         if (commentUseCase.checkTextErrors(comment.getText())) {
             HashMap<String, String> errors = new HashMap<>();
@@ -105,9 +102,7 @@ public class ApiGeneralController {
             return new ResponseEntity<>(new ResultWithErrorsDto(false, errors), HttpStatus.OK);
         }
         int id = commentUseCase.addComment(comment, httpSession.getId());
-        HashMap<String, Integer> commentId = new HashMap<>();
-        commentId.put("id", id);
-        return new ResponseEntity<>(commentId, HttpStatus.OK);
+        return new ResponseEntity<>(new ResultWithIdDto(id), HttpStatus.OK);
     }
 
     @GetMapping("/api/tag")
@@ -124,19 +119,17 @@ public class ApiGeneralController {
     }
 
     @PostMapping("/api/moderation")
-    public ResponseEntity setModerationStatus(@RequestBody ModerationDto moderation) {
+    public ResponseEntity<HttpStatus> setModerationStatus(@RequestBody ModerationDto moderation) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        HashMap<String, String> message = postUseCase.setModerationStatus(
+        if (postUseCase.setModerationStatus(
                 moderation.getPostId(),
                 userSecurity.getAuthorizedUserId(httpSession.getId()),
-                moderation.getDecision()
-        );
-        if (message.isEmpty()) {
-            return new ResponseEntity(HttpStatus.OK);
+                moderation.getDecision())) {
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Пост не существует");
         }
     }
 
@@ -147,7 +140,7 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/api/settings")
-    public ResponseEntity getSettings() {
+    public ResponseEntity<LinkedHashMap<String, Boolean>> getSettings() {
         return new ResponseEntity<>(settingUseCase.getSettings(), HttpStatus.OK);
     }
 
@@ -157,19 +150,19 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/api/statistics/all")
-    public ResponseEntity getAllStatistics() {
+    public ResponseEntity<LinkedHashMap<String, Object>> getAllStatistics() {
         if (!settingUseCase.isStatisticsPublic()) {
             if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-                return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
         }
         return new ResponseEntity<>(postUseCase.getAllStatistics(), HttpStatus.OK);
     }
 
     @GetMapping("/api/statistics/my")
-    public ResponseEntity getMyStatistics() {
+    public ResponseEntity<LinkedHashMap<String, Object>> getMyStatistics() {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(postUseCase.getStatisticsByUser(userSecurity.getAuthorizedUserId(httpSession.getId())), HttpStatus.OK);
     }

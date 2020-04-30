@@ -41,14 +41,14 @@ public class DefaultController {
     }
 
     @GetMapping("/upload/{firstDir}/{secondDir}/{thirdDir}/{fileName:.+}")
-    public ResponseEntity getImage(@PathVariable("firstDir") String firstDir,
+    public ResponseEntity<byte[]> getImage(@PathVariable("firstDir") String firstDir,
                                    @PathVariable("secondDir") String secondDir,
                                    @PathVariable("thirdDir") String thirdDir,
                                    @PathVariable("fileName") String fileName) {
         String path = "/" + firstDir + "/" + secondDir + "/" + thirdDir + "/" + fileName;
         byte[] image = fileService.getImage(path);
         if (image.length == 0) {
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(image, HttpStatus.OK);
     }

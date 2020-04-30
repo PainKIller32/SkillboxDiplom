@@ -49,7 +49,7 @@ public class Tag {
     public Double getFrequencyOfOccurrence() {
         double frequency = 0;
         for (Post post : posts) {
-            if (post.getActive() == 1 && post.getModerationStatus().equals(ModerationStatus.ACCEPTED) && post.getTime().isBefore(LocalDateTime.now())) {
+            if (post.isActive() && post.getModerationStatus().equals(ModerationStatus.ACCEPTED) && post.getTime().isBefore(LocalDateTime.now())) {
                 frequency++;
             }
         }

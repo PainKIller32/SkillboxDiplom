@@ -8,8 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class PostByYearCountDto {
-    public LinkedList<Integer> years;
-    public LinkedHashMap<String, Integer> posts;
+    public final LinkedList<Integer> years;
+    public final LinkedHashMap<String, Integer> posts;
 
     public PostByYearCountDto(List<PostByYearCount> posts, LinkedList<Integer> years) {
         this.years = years;

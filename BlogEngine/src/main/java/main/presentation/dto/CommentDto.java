@@ -5,10 +5,10 @@ import main.domain.model.PostComment;
 import java.time.format.DateTimeFormatter;
 
 public class CommentDto {
-    public int id;
-    public String time;
-    public UserByCommentDto user;
-    public String text;
+    public final int id;
+    public final String time;
+    public final UserByCommentDto user;
+    public final String text;
 
     public CommentDto(PostComment comment) {
         this.id = comment.getId();
