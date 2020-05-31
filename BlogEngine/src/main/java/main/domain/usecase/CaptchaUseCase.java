@@ -18,7 +18,7 @@ import java.util.Base64;
 import java.util.Random;
 
 @Component
-@Transactional(readOnly = true)
+@Transactional
 public class CaptchaUseCase {
     private final CaptchaRepositoryPort captchaRepositoryPort;
 

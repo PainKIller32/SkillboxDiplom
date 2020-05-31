@@ -5,6 +5,7 @@ import main.domain.dto.NewPostDto;
 import main.domain.model.Post;
 import main.domain.usecase.PostUseCase;
 import main.presentation.dto.*;
+import main.presentation.exception.FalseResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,9 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post")
-    public ResponseEntity<PostsDto> getPosts(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("mode") String mode) {
+    public ResponseEntity<PostsDto> getPosts(@RequestParam("offset") int offset,
+                                             @RequestParam("limit") int limit,
+                                             @RequestParam("mode") String mode) {
         Iterable<Post> posts = postUseCase.getPosts(offset, limit, mode);
         if (posts == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -45,7 +48,9 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/search")
-    public ResponseEntity<PostsDto> searchPost(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("query") String query) {
+    public ResponseEntity<PostsDto<PostShortViewDto>> searchPost(@RequestParam("offset") int offset,
+                                                                 @RequestParam("limit") int limit,
+                                                                 @RequestParam("query") String query) {
         return getResponseEntityWithPosts(postUseCase.searchPost(query), offset, limit);
     }
 
@@ -57,17 +62,23 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/byDate")
-    public ResponseEntity<PostsDto> getPostsByDate(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("date") String date) {
+    public ResponseEntity<PostsDto<PostShortViewDto>> getPostsByDate(@RequestParam("offset") int offset,
+                                                                     @RequestParam("limit") int limit,
+                                                                     @RequestParam("date") String date) {
         return getResponseEntityWithPosts(postUseCase.getPostsByDate(date), offset, limit);
     }
 
     @GetMapping("/api/post/byTag")
-    public ResponseEntity<PostsDto> getPostsByTag(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("tag") String tag) {
+    public ResponseEntity<PostsDto<PostShortViewDto>> getPostsByTag(@RequestParam("offset") int offset,
+                                                                    @RequestParam("limit") int limit,
+                                                                    @RequestParam("tag") String tag) {
         return getResponseEntityWithPosts(postUseCase.getPostsByTag(tag), offset, limit);
     }
 
     @GetMapping("/api/post/moderation")
-    public ResponseEntity<PostsDto> getPostByModeration(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("status") String status) {
+    public ResponseEntity<PostsDto> getPostByModeration(@RequestParam("offset") int offset,
+                                                        @RequestParam("limit") int limit,
+                                                        @RequestParam("status") String status) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -81,7 +92,9 @@ public class ApiPostController {
     }
 
     @GetMapping("/api/post/my")
-    public ResponseEntity<PostsDto> getMyPosts(@RequestParam("offset") int offset, @RequestParam("limit") int limit, @RequestParam("status") String status) {
+    public ResponseEntity<PostsDto<PostShortViewDto>> getMyPosts(@RequestParam("offset") int offset,
+                                                                 @RequestParam("limit") int limit,
+                                                                 @RequestParam("status") String status) {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -95,7 +108,7 @@ public class ApiPostController {
         }
         HashMap<String, String> errors = postUseCase.checkPostErrors(newPost.getText(), newPost.getTitle());
         if (!errors.isEmpty()) {
-            return new ResponseEntity<>(new ResultWithErrorsDto(false, errors), HttpStatus.OK);
+            throw new FalseResultException(errors);
         }
         postUseCase.addPost(userSecurity.getAuthorizedUserId(httpSession.getId()), newPost);
         return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);
@@ -108,7 +121,7 @@ public class ApiPostController {
         }
         HashMap<String, String> errors = postUseCase.checkPostErrors(newPost.getText(), newPost.getTitle());
         if (!errors.isEmpty()) {
-            return new ResponseEntity<>(new ResultWithErrorsDto(false, errors), HttpStatus.OK);
+            throw new FalseResultException(errors);
         } else {
             return postUseCase.editPost(userSecurity.getAuthorizedUserId(httpSession.getId()), id, newPost) ?
                     new ResponseEntity<>(ResultDto.success(), HttpStatus.OK) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -130,11 +143,14 @@ public class ApiPostController {
         if (!userSecurity.checkUserAuthorization(httpSession.getId())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        return postUseCase.votePost(userSecurity.getAuthorizedUserId(httpSession.getId()), postId, value) ?
-                new ResponseEntity<>(ResultDto.success(), HttpStatus.OK) : new ResponseEntity<>(ResultDto.decline(), HttpStatus.OK);
+        if (postUseCase.votePost(userSecurity.getAuthorizedUserId(httpSession.getId()), postId, value)) {
+            return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);
+        } else {
+            throw new FalseResultException();
+        }
     }
 
-    private ResponseEntity<PostsDto> getResponseEntityWithPosts(List<Post> posts, int offset, int limit) {
+    private ResponseEntity<PostsDto<PostShortViewDto>> getResponseEntityWithPosts(List<Post> posts, int offset, int limit) {
         if (posts.isEmpty()) {
             return new ResponseEntity<>(new PostsDto<>(posts.size(), new ArrayList<>()), HttpStatus.OK);
         }

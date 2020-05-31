@@ -9,6 +9,7 @@ import main.domain.service.UserSecurity;
 import main.domain.usecase.*;
 import main.presentation.dto.*;
 import main.presentation.exception.BadRequestException;
+import main.presentation.exception.FalseResultException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -79,7 +80,7 @@ public class ApiGeneralController {
         if (errors.isEmpty()) {
             return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(new ResultWithErrorsDto(false, errors), HttpStatus.OK);
+            throw new FalseResultException(errors);
         }
     }
 
@@ -99,7 +100,7 @@ public class ApiGeneralController {
         if (commentUseCase.checkTextErrors(comment.getText())) {
             HashMap<String, String> errors = new HashMap<>();
             errors.put("text", "Текст комментария не задан или слишком короткий");
-            return new ResponseEntity<>(new ResultWithErrorsDto(false, errors), HttpStatus.OK);
+            throw new FalseResultException(errors);
         }
         int id = commentUseCase.addComment(comment, httpSession.getId());
         return new ResponseEntity<>(new ResultWithIdDto(id), HttpStatus.OK);

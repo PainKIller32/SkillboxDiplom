@@ -14,7 +14,6 @@ import java.util.Optional;
 public interface CaptchaCodeRepository extends CrudRepository<CaptchaCode, Integer> {
     Optional<CaptchaCode> findBySecretCodeEquals(String secretCode);
 
-    @Transactional
     @Modifying
     @Query("delete from CaptchaCode AS cc WHERE cc.time < :time")
     void deleteOldCaptcha(LocalDateTime time);

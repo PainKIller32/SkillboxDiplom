@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
-@Transactional
 public class UserSecurity {
     private ConcurrentMap<String, Integer> authorizedUsers = new ConcurrentHashMap<>();
 

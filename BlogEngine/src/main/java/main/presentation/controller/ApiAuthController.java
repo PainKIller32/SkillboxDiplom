@@ -7,6 +7,7 @@ import main.domain.model.User;
 import main.domain.usecase.CaptchaUseCase;
 import main.domain.usecase.UserUseCase;
 import main.presentation.dto.*;
+import main.presentation.exception.FalseResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,9 @@ public class ApiAuthController {
         Optional<User> findUser = userUseCase.login(userLogin.getEmail(), userLogin.getPassword(), httpSession.getId());
         return findUser.<ResponseEntity<ResultDto>>map(
                 user -> new ResponseEntity<>(new ResultWithUserDto(true, new UserByAuthDto(user, userUseCase.getModerationCount(user))), HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(ResultDto.decline(), HttpStatus.OK));
+                .orElseGet(() -> {
+                    throw new FalseResultException();
+                });
     }
 
     @GetMapping("/api/auth/check")
@@ -46,12 +49,16 @@ public class ApiAuthController {
         if (user != null) {
             return new ResponseEntity<>(new ResultWithUserDto(true, new UserByAuthDto(user, userUseCase.getModerationCount(user))), HttpStatus.OK);
         }
-        return new ResponseEntity<>(ResultDto.decline(), HttpStatus.OK);
+        throw new FalseResultException();
     }
 
     @PostMapping("/api/auth/restore")
     public ResponseEntity<ResultDto> restorePassword(@RequestBody UserEmailDto email) {
-        return new ResponseEntity<>(userUseCase.restorePassword(email.getEmail()) ? ResultDto.success() : ResultDto.decline(), HttpStatus.OK);
+        if (userUseCase.restorePassword(email.getEmail())) {
+            return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);
+        } else {
+            throw new FalseResultException();
+        }
     }
 
     @PostMapping("/api/auth/password")
@@ -60,7 +67,7 @@ public class ApiAuthController {
         if (errors.isEmpty()) {
             return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(new ResultWithErrorsDto(false, errors), HttpStatus.OK);
+            throw new FalseResultException(errors);
         }
     }
 
@@ -70,7 +77,7 @@ public class ApiAuthController {
         if (errors.isEmpty()) {
             return new ResponseEntity<>(ResultDto.success(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(new ResultWithErrorsDto(false, errors), HttpStatus.OK);
+            throw new FalseResultException(errors);
         }
     }
 
